@@ -1,0 +1,164 @@
+/* Light theme: clean, readable, and accessible.
+	 - Keeps original classnames and structure
+	 - Uses slightly opaque surfaces but keeps high contrast for text
+*/
+
+:root{
+	--bg: #f6f9fc; /* page background */
+	--card: #ffffff; /* panel surface */
+	--text: #0b1b2b; /* primary text color */
+	--muted: #6b7280; /* secondary text */
+	--accent: #0077ff; /* primary action color */
+	--accent-600: #005fcc;
+	--success: #117a46;
+	--danger: #c53030;
+
+	--glass: rgba(255,255,255,0.85); /* slightly translucent card */
+	--radius: 12px;
+	--shadow: 0 8px 24px rgba(15,23,42,0.06);
+}
+
+/* Dark theme overrides. Applied when `data-theme="dark"` is present on <html> */
+[data-theme="dark"]{
+	--bg: linear-gradient(180deg,#071124 0%, #071a2a 60%);
+	--card: #071022;
+	--text: #e6eef8;
+	--muted: #1f3d67;
+	--accent: #4f9aff;
+	--accent-600: #2b7de6;
+	--success: #28c76f;
+	--danger: #ff6b6b;
+	--glass: rgba(255,255,255,0.03);
+	--shadow: 0 10px 30px rgba(2,6,23,0.6);
+
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+	margin:0;
+	font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+	background: var(--bg);
+	color:var(--text);
+	-webkit-font-smoothing:antialiased;
+	font-size:15px; line-height:1.45;
+}
+
+.container{max-width:1120px;margin:28px auto;padding:20px}
+
+/* Header */
+.site-header{
+	background:var(--card);
+	border-radius:12px;
+	padding:14px 20px;
+	box-shadow:var(--shadow);
+	border:1px solid rgba(11,27,43,0.03);
+}
+.header-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand h1{margin:0;font-size:20px;color:var(--text);letter-spacing:-0.2px}
+.brand .tag{margin:4px 0 0;color:var(--muted);font-size:13px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.header-actions .btn{font-weight:600}
+.header-actions .btn.ghost{background:transparent;border:1px solid rgba(11,27,43,0.06);color:var(--accent);padding:8px 14px;border-radius:10px}
+
+
+/* Hero */
+.hero{padding:18px 0}
+.hero-inner{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.hero h2{margin:0;font-size:20px}
+.hero .muted{margin-top:6px;color:var(--muted)}
+
+/* Grid */
+.main-grid{display:grid;grid-template-columns:320px 1fr 320px;gap:18px;margin-top:18px}
+.panel{background:var(--glass);border-radius:var(--radius);padding:18px;border:1px solid rgba(11,27,43,0.04);box-shadow:var(--shadow)}
+.search-panel{min-height:220px}
+.details-panel{min-height:220px}
+.account-panel{min-height:120px}
+
+/* Search */
+.search-form{display:flex;gap:10px;align-items:center}
+.search-form input[type="search"]{flex:1;padding:12px 14px;border-radius:10px;border:1px solid rgba(11,27,43,0.06);background:var(--card);color:var(--text);font-size:14px}
+.search-form input[type="search"]::placeholder{color:rgba(11,27,43,0.36)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-600));color:#fff}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,27,43,0.06)}
+.btn:hover{filter:brightness(.98);transform:translateY(-1px)}
+
+/* Notifications */
+.notification{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:13px;color:var(--text);display:inline-block}
+.notification.info{background:rgba(0,119,255,0.08);color:var(--accent)}
+.notification.success{background:rgba(17,122,70,0.08);color:var(--success)}
+.notification.error{background:rgba(197,48,48,0.08);color:var(--danger)}
+
+.list{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.card{display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:12px;background:var(--card);border:1px solid rgba(11,27,43,0.03);box-shadow:0 6px 20px rgba(11,27,43,0.04);cursor:default}
+.card .card-body{flex:1}
+.card .card-title{font-weight:700;color:var(--text)}
+.card .card-sub{color:var(--muted);font-size:13px;margin-top:6px}
+.card-actions{margin-left:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+
+.hospital-card{border-left:4px solid rgba(0,119,255,0.12)}
+.doctor-card{border-left:4px solid rgba(17,122,70,0.12)}
+.doctor-card .status{font-size:13px;padding:6px 8px;border-radius:999px;color:#fff;font-weight:700;background:var(--success)}
+.doctor-card .status.unavailable{background:var(--danger)}
+
+.doctor-details{margin-top:8px}
+.doctor-details .small{font-size:13px;color:var(--muted)}
+.doctor-details .contact{margin-top:6px}
+
+.card-actions .btn{padding:8px 12px;border-radius:10px;font-size:13px}
+.card-actions .btn.book{background:linear-gradient(90deg,var(--success),#18a45c);color:#fff}
+.card-actions .btn.view{background:linear-gradient(90deg,var(--accent),#2b7de6)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(11,27,43,0.45);opacity:0;pointer-events:none;transition:opacity .18s ease}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-dialog{width:100%;max-width:560px;background:var(--card);border-radius:14px;padding:18px;box-shadow:0 30px 80px rgba(11,27,43,0.08);transform:translateY(10px) scale(.995);transition:transform .18s ease, opacity .18s ease}
+.modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(11,27,43,0.04);padding-bottom:8px}
+.modal-body{padding:14px 0;display:flex;flex-direction:column;gap:12px}
+.modal-body label{display:block;font-size:13px;margin-bottom:6px}
+.modal-body input[type="datetime-local"], .modal-body textarea{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(11,27,43,0.06);background:var(--card);color:var(--text);font-size:14px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;padding-top:8px;border-top:1px solid rgba(11,27,43,0.04)}
+
+/* Spinner */
+.small-spinner{width:18px;height:18px;border-radius:50%;border:3px solid rgba(11,27,43,0.06);border-top-color:var(--accent);animation:spin .9s linear infinite;margin-left:8px;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.loading{color:var(--muted);padding:8px;display:flex;align-items:center;gap:10px}
+.loading:before{content:'';width:18px;height:18px;border-radius:50%;border:3px solid rgba(11,27,43,0.06);border-top-color:var(--accent);animation:spin .9s linear infinite}
+
+.empty{color:var(--muted);padding:18px;background:transparent;border-radius:10px;text-align:center}
+.doctors-header{font-weight:700;margin-bottom:8px}
+
+.site-footer{margin-top:20px;padding:18px 0;text-align:center;color:var(--muted);font-size:13px}
+
+/* Responsive tweaks */
+@media (max-width: 980px){
+	.main-grid{grid-template-columns:1fr}
+	.header-row{flex-direction:column;align-items:flex-start}
+	.header-actions{width:100%;justify-content:flex-end}
+}
+@media (max-width:760px){
+	.modal-dialog{margin:16px;border-radius:12px;width:calc(100% - 32px)}
+	.main-grid{grid-template-columns:1fr}
+}
+
+/* Typography */
+h1{font-size:22px}
+h2{font-size:18px;margin:0 0 10px}
+h3{font-size:15px;margin:0 0 8px}
+
+.muted{color:var(--muted)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Small touches */
+.account-box{
+	/* Use the theme card surface to ensure high contrast and opacity in both themes */
+	background: var(--card);
+	padding:12px;border-radius:10px;border:1px solid rgba(11,27,43,0.06);
+	box-shadow: 0 6px 18px rgba(11,27,43,0.04);
+}
+.account-box strong{color:var(--text);font-weight:700}
+
+.brand h1 small{color:var(--muted);font-weight:600}
+

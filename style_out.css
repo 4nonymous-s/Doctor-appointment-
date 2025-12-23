@@ -1,0 +1,114 @@
+:root{
+	--bg:#f4f7fb;
+	--card:#ffffff;
+	--muted:#6b7280;
+	--accent:#0b66d1;
+	--accent-600:#095bb8;
+	--success:#167d3e;
+	--danger:#c0392b;
+	--radius:10px;
+	--shadow: 0 8px 24px rgba(16,24,40,0.08);
+}
+*{box-sizing:border-box}
+body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:#111; margin:0; -webkit-font-smoothing:antialiased}
+.container{max-width:1100px;margin:28px auto;padding:20px}
+
+.site-header{background:linear-gradient(90deg, #ffffff 0%, #f8fbff 100%);border-bottom:1px solid rgba(16,24,40,0.04)}
+.header-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand h1{margin:0;font-size:20px;letter-spacing:-0.2px}
+.brand .tag{margin:4px 0 0;color:var(--muted);font-size:13px}
+.header-actions .btn.ghost{background:transparent;border:1px solid rgba(16,24,40,0.06);color:var(--accent);padding:8px 12px;border-radius:8px}
+
+.main-grid{display:grid;grid-template-columns:360px 1fr 260px;gap:18px;margin-top:18px}
+.panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.search-panel{min-height:220px}
+.details-panel{min-height:220px}
+.account-panel{min-height:120px}
+
+.search-form{display:flex;gap:10px;align-items:center}
+.search-form input[type="search"]{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(16,24,40,0.06);font-size:14px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--accent)}
+.btn:hover{background:var(--accent-600)}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(16,24,40,0.06)}
+
+.notification{margin-top:12px;padding:8px 10px;border-radius:8px;font-size:13px;color:#fff;display:inline-block}
+.notification.info{background:#2563eb}
+.notification.success{background:var(--success)}
+.notification.error{background:var(--danger)}
+
+/* notification animation */
+.notification{opacity:0;transform:translateY(-6px);transition:opacity .28s ease, transform .28s ease}
+.notification.show{opacity:1;transform:translateY(0)}
+
+.list{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.card{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;border:1px solid rgba(16,24,40,0.03);background:linear-gradient(180deg,#fff,#fbfdff)}
+.card{transition:transform .18s ease, box-shadow .18s ease;}
+.card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(16,24,40,0.08)}
+.card .card-body{flex:1}
+.card .card-title{font-weight:700}
+.card .card-sub{color:var(--muted);font-size:13px;margin-top:6px}
+.card-actions{margin-left:12px;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+
+.hospital-card{border-left:4px solid rgba(11,102,209,0.08)}
+.doctor-card{border-left:4px solid rgba(6,148,90,0.08)}
+.doctor-card .status{font-size:13px;padding:6px 8px;border-radius:999px;color:#fff;font-weight:600}
+.doctor-card .status.available{background:var(--success)}
+.doctor-card .status.unavailable{background:var(--danger)}
+
+/* Buttons: subtle elevation and focus styles */
+.btn{transition:transform .12s ease, box-shadow .12s ease, background-color .12s ease}
+.btn:active{transform:translateY(1px) scale(.997)}
+.btn:focus{outline:3px solid rgba(11,102,209,0.12);outline-offset:3px}
+
+/* Accessible focus-visible (for keyboard users) */
+:focus:not(:focus-visible){outline:none}
+
+/* Loading spinner (small) */
+.loading{color:var(--muted);padding:8px;display:flex;align-items:center;gap:10px}
+.loading:before{content:'';width:18px;height:18px;border-radius:50%;border:3px solid rgba(0,0,0,0.08);border-top-color:var(--accent);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.empty{color:var(--muted);padding:18px;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:8px;text-align:center}
+.loading{color:var(--muted);padding:8px}
+.doctors-header{font-weight:700;margin-bottom:8px}
+
+.site-footer{margin-top:20px;padding:18px 0;text-align:center;color:var(--muted);font-size:13px}
+
+@media (max-width: 980px){
+	.main-grid{grid-template-columns:1fr;}
+	.header-row{flex-direction:column;align-items:flex-start}
+	.header-actions{width:100%}
+}
+
+/* Small touch: improved typography scale */
+body{font-size:15px;line-height:1.45}
+h1{font-size:22px}
+h2{font-size:18px;margin:0 0 10px}
+h3{font-size:15px;margin:0 0 8px}
+
+/* Utilities */
+.muted{color:var(--muted)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Modal styles */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:60}
+.modal.open{display:flex}
+.modal-backdrop{position:absolute;inset:0;background:rgba(2,6,23,0.45);backdrop-filter:blur(3px)}
+.modal-panel{position:relative;background:var(--card);border-radius:12px;box-shadow:0 24px 60px rgba(2,6,23,0.24);width:420px;max-width:calc(100% - 40px);z-index:2;padding:14px}
+.modal-panel{opacity:0;transform:translateY(10px) scale(.995);transition:opacity .22s ease, transform .22s ease}
+.modal.open .modal-panel{opacity:1;transform:translateY(0) scale(1)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.modal-header h3{margin:0;font-size:16px}
+.modal-body{display:flex;flex-direction:column;gap:10px}
+.form-row{display:flex;flex-direction:column;gap:6px}
+.form-row label{font-size:13px;color:var(--muted)}
+.form-row input[type='text'], .form-row input[type='search'], .form-row input[type='datetime-local'], .form-row input{padding:10px;border-radius:8px;border:1px solid rgba(16,24,40,0.06)}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+
+.modal-error{color:var(--danger);font-size:13px;padding:6px 8px;background:rgba(192,57,43,0.06);border-radius:8px}
+
+/* Small responsive tweaks for modal */
+@media (max-width:480px){
+	.modal-panel{width:94%;padding:12px}
+}

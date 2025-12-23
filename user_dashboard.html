@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your Dashboard - Hospital Appointment Finder</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <h1>Your Dashboard</h1>
+          <p class="tag">Account details and bookings</p>
+        </div>
+        <nav class="header-actions" aria-label="Top actions">
+          <button id="themeToggle" class="btn ghost" title="Toggle theme" aria-pressed="false">🌙</button>
+          <a href="/" class="btn ghost">Home</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container main-grid" id="main">
+      <section class="panel" aria-labelledby="account-heading">
+        <h2 id="account-heading">Account Details</h2>
+        <div class="account-box">
+          <p><strong>Username:</strong> {{ user.username }}</p>
+          <p><strong>Full name:</strong> {{ user.full_name or '—' }}</p>
+          <p><strong>Phone:</strong> {{ user.phone or '—' }}</p>
+          <div style="margin-top:12px"><a id="backHome" class="btn ghost" href="/">Back</a></div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="history-heading">
+        <h2 id="history-heading">Booking History</h2>
+        <div style="margin-bottom:10px;display:flex;justify-content:flex-end">
+          <button id="clearHistory" class="btn ghost">Clear history</button>
+        </div>
+        {% if appointments and appointments|length > 0 %}
+          <div id="appointmentsList" class="list">
+            {% for a in appointments %}
+              <article class="card" data-appt-id="{{ a.id }}">
+                <div class="card-body">
+                  <div class="card-title">{{ a.doctor or 'Unknown doctor' }}</div>
+                  <div class="card-sub">{{ a.hospital or 'Unknown hospital' }}</div>
+                  <div class="muted small">Scheduled: {{ a.scheduled_at or '—' }}</div>
+                  <div class="muted small">Status: <span class="appt-status">{{ a.status }}</span></div>
+                  <div class="muted small">Booked on: {{ a.created_at }}</div>
+                </div>
+                <div class="card-actions">
+                  {% if a.status and a.status|lower == 'booked' %}
+                    <button class="btn ghost cancel-appt" data-appt-id="{{ a.id }}">Cancel</button>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty">No bookings found.</div>
+        {% endif %}
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <small>Built with care · Sample data · Not for production</small>
+      </div>
+    </footer>
+
+    <script>
+      // Get user id passed in query param if available
+      function getQuery(name){
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+      }
+      const uid = getQuery('user_id') || localStorage.getItem('currentUserId');
+
+      document.getElementById('clearHistory').addEventListener('click', async function(){
+        if(!uid) return alert('Not signed in');
+        if(!confirm('Clear all your booking history? This cannot be undone.')) return;
+        this.disabled = true;
+        try{
+          const resp = await fetch('/api/history/' + encodeURIComponent(uid) + '/clear', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({user_id: uid})});
+          const data = await resp.json();
+          if(resp.ok){
+            window.location.reload();
+          } else {
+            alert(data.error || JSON.stringify(data));
+            this.disabled = false;
+          }
+        }catch(e){ alert(e.message || 'Clear failed'); this.disabled = false; }
+      });
+
+      // Delegate cancel buttons
+      (function(){
+        const list = document.getElementById('appointmentsList');
+        if(!list) return;
+        list.addEventListener('click', async function(e){
+          const btn = e.target.closest && e.target.closest('.cancel-appt');
+          if(!btn) return;
+          const apptId = btn.getAttribute('data-appt-id');
+          if(!apptId) return;
+          if(!confirm('Cancel this booking?')) return;
+          btn.disabled = true;
+          try{
+            const resp = await fetch('/api/appointment/' + encodeURIComponent(apptId) + '/cancel', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({user_id: uid})});
+            const data = await resp.json();
+            if(resp.ok){
+              window.location.reload();
+            } else {
+              alert(data.error || JSON.stringify(data));
+              btn.disabled = false;
+            }
+          }catch(err){ alert(err.message || 'Cancel failed'); btn.disabled = false; }
+        });
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hospital Appointment Finder</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-row">
+        <div class="brand">
+          <h1>Doctor Appointment Finder</h1>
+          <p class="tag">Find nearby hospitals & book appointments</p>
+        </div>
+        <nav class="header-actions" aria-label="Top actions">
+          <button id="themeToggle" class="btn ghost" title="Toggle theme" aria-pressed="false">🌙</button>
+          <button id="openLogin" class="btn ghost" title="Sign in">Login</button>
+          
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container">
+        <div class="hero-inner">
+          <div>
+            <h2>Find hospital appointments near you</h2>
+            <p class="muted">Quick search hospitals by locality, view doctors and open the booking UI.</p>
+          </div>
+          
+        </div>
+      </div>
+    </section>
+
+    <main class="container main-grid" id="main">
+      <section class="panel search-panel" aria-labelledby="search-heading">
+        <h2 id="search-heading">Search Hospitals</h2>
+        <form id="searchForm" class="search-form" onsubmit="return false;" aria-label="Search hospitals by locality">
+          <label for="locality" class="sr-only">Locality</label>
+          <input id="locality" name="locality" type="search" placeholder="Enter locality (e.g. Downtown)" aria-label="Locality" />
+          <button id="search" class="btn primary" aria-label="Search hospitals">Search</button>
+        </form>
+  <div id="notif" class="notification" role="status" aria-live="polite" hidden></div>
+  <div id="spinner" class="small-spinner" hidden aria-hidden="true" title="loading" aria-hidden="true"></div>
+        <div id="results" class="list" aria-live="polite"></div>
+      </section>
+
+      <section class="panel details-panel" aria-labelledby="doctors-heading">
+        <h2 id="doctors-heading">Doctors</h2>
+        <div id="doctor_results" class="list"></div>
+      </section>
+
+      <aside class="panel account-panel" aria-labelledby="account-heading">
+        <h3 id="account-heading">Account (Fallback)</h3>
+        <div class="account-box">
+          <p>Accounts to be restired appear here</p>
+          <small class="muted">This fallback UI supports search and viewing doctors.</small>
+          <div style="margin-top:8px">
+            <!-- Dashboard button removed -->
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <small>Built with care · Sample data · Not for production</small>
+      </div>
+    </footer>
+    <script>
+      const $ = id => document.getElementById(id);
+      const notif = $('notif');
+
+      function showNotification(message, type='info'){
+        notif.hidden = false;
+        notif.textContent = message;
+        notif.className = 'notification ' + type;
+        setTimeout(()=>{ notif.hidden = true; notif.className='notification'; }, 4000);
+      }
+
+      async function search(){
+        try{
+            const searchBtn = $('search');
+            $('results').innerHTML = '';
+            $('doctor_results').innerHTML = '';
+            showNotification('Searching...', 'info');
+            $('spinner').hidden = false;
+            searchBtn.disabled = true;
+            const loc = $('locality').value || '';
+            const resp = await fetch('/api/hospitals?locality='+encodeURIComponent(loc));
+            if(!resp.ok) throw new Error('Search failed');
+            const data = await resp.json();
+            renderHospitals(data);
+            showNotification(data.length ? `Found ${data.length} hospital(s)` : 'No hospitals found', 'success');
+          }catch(err){
+            showNotification(err.message || 'Error searching', 'error');
+          }finally{
+            $('spinner').hidden = true;
+            try{ $('search').disabled = false }catch(e){}
+          }
+      }
+
+        // Debounce helper: returns a debounced version of fn
+        function debounce(fn, wait){
+          let t;
+          return function(...args){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,args), wait); }
+        }
+
+      function renderHospitals(list){
+        const r = $('results');
+        if(!Array.isArray(list) || list.length===0){ r.innerHTML = '<div class="empty">No hospitals found.</div>'; return }
+        r.innerHTML = list.map(h=>`
+          <article class="card hospital-card" data-id="${h.id}">
+            <div class="card-body">
+              <div class="card-title">${h.name}</div>
+              <div class="card-sub">${h.locality} · ${h.address || ''}</div>
+            </div>
+            <div class="card-actions">
+              <button class="btn view-doctors" data-hospital-id="${h.id}" data-hospital-name='${JSON.stringify(h.name).slice(1,-1)}'>View Doctors</button>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      async function viewDoctors(hospitalId, hospitalName){
+        try{
+          const dr = $('doctor_results');
+          dr.innerHTML = '<div class="loading">Loading doctors…</div>';
+          const resp = await fetch('/api/hospital/'+hospitalId+'/doctors');
+          if(!resp.ok) throw new Error('Failed to load doctors');
+          const data = await resp.json();
+          renderDoctors(data, hospitalName, hospitalId);
+        }catch(err){
+          showNotification(err.message || 'Error loading doctors', 'error');
+        }
+      }
+
+      function renderDoctors(list, hospitalName, hospitalId){
+        const d = $('doctor_results');
+        if(!Array.isArray(list) || list.length===0){ d.innerHTML = `<div class="empty">No doctors found for ${hospitalName}.</div>`; return }
+        d.innerHTML = `<div class="doctors-header">Doctors at ${hospitalName}</div>` + list.map(doc=>`
+          <article class="card doctor-card">
+            <div class="card-body">
+              <div class="card-title">${doc.name}</div>
+              <div class="card-sub">${doc.specialty || ''} · Ward: ${doc.ward || '—'}</div>
+              <div class="doctor-details">
+                <div class="muted small">${doc.qualification ? doc.qualification : ''}${doc.qualification && doc.experience_years ? ' · ' : ''}${doc.experience_years ? doc.experience_years + ' yrs exp' : ''}</div>
+                <div class="contact small">${doc.email ? '✉ ' + doc.email : ''}${doc.email && doc.phone ? ' · ' : ''}${doc.phone ? '☎ ' + doc.phone : ''}</div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <div class="status ${doc.is_available ? 'available' : 'unavailable'}">${doc.is_available ? 'Available' : 'Not available'}</div>
+              <button class="btn book-doctor" data-doctor-id="${doc.id}" data-doctor-name='${JSON.stringify(doc.name).slice(1,-1)}' data-hospital-id='${hospitalId}' data-hospital-name='${JSON.stringify(hospitalName).slice(1,-1)}' ${doc.is_available ? '' : 'disabled'}>Book</button>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      
+
+      // Wire search button
+      $('search').addEventListener('click', search);
+  // Allow Enter key in input and also debounce typing to auto-search
+  const localityInput = $('locality');
+  localityInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); search(); }});
+  localityInput.addEventListener('input', debounce(()=>{ if(localityInput.value.trim().length>0) search(); }, 700));
+
+      // Event delegation for dynamically-rendered buttons
+      $('results').addEventListener('click', (e)=>{
+        const btn = e.target.closest && e.target.closest('.view-doctors');
+        if(!btn) return;
+        const id = btn.getAttribute('data-hospital-id');
+        const name = btn.getAttribute('data-hospital-name') || '';
+        viewDoctors(id, name);
+      });
+
+      $('doctor_results').addEventListener('click', (e)=>{
+        const btn = e.target.closest && e.target.closest('.book-doctor');
+        if(!btn) return;
+        const docId = btn.getAttribute('data-doctor-id');
+        const docName = btn.getAttribute('data-doctor-name');
+        const hospitalId = btn.getAttribute('data-hospital-id');
+        const hospitalName = btn.getAttribute('data-hospital-name') || '';
+        // open accessible booking modal (if available), otherwise fallback to alert
+        if(window.openBookingModal) openBookingModal(docName, hospitalId, hospitalName);
+        else alert(`Booking is available in React UI or via API. Doctor: ${docName} (id ${docId})`);
+      });
+
+      // Dashboard removed from fallback UI (iframe/modal and triggers removed).
+
+      // initial load: show some hospitals (empty search)
+      (function(){ search(); })();
+    </script>
+
+    <!-- Booking modal (static markup) -->
+    <div id="bookingModal" class="modal-overlay" role="dialog" aria-hidden="true" aria-modal="true" aria-labelledby="booking-modal-title">
+      <div class="modal-dialog" role="document">
+        <header class="modal-header">
+          <h3 id="booking-modal-title">Book appointment</h3>
+          <button id="modalClose" class="btn ghost" aria-label="Close booking dialog">✕</button>
+        </header>
+        <div class="modal-body">
+          <div class="modal-info">
+            <div><strong id="modalDoctor">Doctor name</strong></div>
+            <div class="muted" id="modalHospital">Hospital</div>
+          </div>
+          <form id="bookingForm">
+            <label for="appt-date">Choose date and time</label>
+            <input id="appt-date" name="appt_date" type="datetime-local" required />
+            <label for="appt-note">Notes (optional)</label>
+            <textarea id="appt-note" name="note" rows="3" placeholder="Any details (symptoms, preference)"></textarea>
+          </form>
+          <div id="modalNotif" class="notification" role="status" aria-live="polite" hidden></div>
+        </div>
+        <footer class="modal-footer">
+          <button id="confirmBooking" class="btn primary">Confirm booking</button>
+          <button id="cancelBooking" class="btn ghost">Cancel</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Login modal (static markup) -->
+    <div id="loginModal" class="modal-overlay" role="dialog" aria-hidden="true" aria-modal="true" aria-labelledby="login-modal-title">
+      <div class="modal-dialog" role="document">
+        <header class="modal-header">
+          <h3 id="login-modal-title">Sign in / Register</h3>
+          <button id="loginModalClose" class="btn ghost" aria-label="Close login dialog">✕</button>
+        </header>
+        <div class="modal-body">
+          <form id="loginForm">
+            <div class="form-row">
+              <label for="login-username">Username</label>
+              <input id="login-username" name="username" type="text" required />
+            </div>
+            <div class="form-row">
+              <label for="login-password">Password</label>
+              <input id="login-password" name="password" type="password" required />
+            </div>
+          </form>
+          <div id="loginNotif" class="notification" role="status" aria-live="polite" hidden></div>
+        </div>
+        <footer class="modal-footer">
+          <button id="loginButton" class="btn primary">Login</button>
+          <button id="registerButton" class="btn ghost">Register</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Static JS for booking and auth -->
+    <script src="/static/booking.js"></script>
+    <script src="/static/auth.js"></script>
+  </body>
+</html>
